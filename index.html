@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Жанжарыма тосынсый</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Arial', sans-serif;
+            background: #1a0a1a; color: white;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        .blur-bg {
+            position: absolute; width: 100%; height: 100%;
+            filter: blur(100px); z-index: -1;
+        }
+        .blob {
+            position: absolute; width: 450px; height: 450px;
+            background: #5c0a32; border-radius: 50%;
+            animation: move 15s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-15%, -15%); }
+            to { transform: translate(15%, 15%); }
+        }
+
+        .container {
+            text-align: center; backdrop-filter: blur(30px);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 50px; border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            max-width: 85%; z-index: 10;
+        }
+
+        h1 { font-size: 2.2rem; margin-bottom: 20px; color: #ffb3c1; }
+
+        #mainHeart {
+            font-size: 80px; cursor: pointer;
+            display: inline-block; transition: all 0.8s ease;
+            user-select: none;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)) grayscale(0.8);
+        }
+
+        .floating-text {
+            position: absolute; color: #ff4d6d; font-weight: bold;
+            pointer-events: none; animation: floatUp 5s linear forwards;
+            text-shadow: 0 0 15px rgba(255, 77, 109, 1);
+            font-size: 1.6rem; white-space: nowrap; z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(0) scale(0.8); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-150px) scale(1.2); }
+        }
+        
+        @keyframes heartbeat {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="blur-bg">
+        <div class="blob" style="top: 0; left: 0;"></div>
+        <div class="blob" style="bottom: 0; right: 0; background: #2d0a5c;"></div>
+    </div>
+
+    <div class="container" id="mainCard">
+        <h1 id="title">Қош келдіңіз, жанжарым!</h1>
+        <p style="opacity: 0.8;">Жүректі 5 рет басыңыз (музыка қосылады):</p>
+        <div id="mainHeart" onclick="growHeart(event)">❤️</div>
+    </div>
+
+    <script>
+        let count = 0;
+        const music = document.getElementById('bgMusic');
+        const messages = [
+            "Жанжарым ❤️", "Қымбаттым ✨", "Отағасы 🏠",
+            "Тірегім менің", "Бақытымсыз", "Асылым",
+            "Қамқоршым", "Барыңызға шүкір!", "Сүйікті жарым!"
+        ];
+
+        function growHeart(event) {
+            count++;
+            
+            // Бірінші рет басқанда музыка басталады
+            if (count === 1) {
+                music.play().catch(e => console.log("Музыканы қосу үшін экранды басу керек"));
+            }
+
+            const heart = document.getElementById('mainHeart');
+            let size = 80 + (count * 45); 
+            heart.style.fontSize = size + 'px';
+
+            let grayValue = 0.8 - (count * 0.2);
+            let glow = count * 20;
+            heart.style.filter = `drop-shadow(0 0 ${glow}px #ff0040) grayscale(${grayValue < 0 ? 0 : grayValue})`;
+
+            createWord(event.clientX, event.clientY);
+
+            if (count >= 5) {
+                setTimeout(showFinalScreen, 1000);
+            }
+        }
+
+        function createWord(x, y) {
+            const word = document.createElement('div');
+            word.className = 'floating-text';
+            word.innerText = messages[Math.floor(Math.random() * messages.length)];
+            word.style.left = (x - 60) + 'px';
+            word.style.top = (y - 40) + 'px';
+            document.body.appendChild(word);
+            setTimeout(() => word.remove(), 5000);
+        }
+
+        function showFinalScreen() {
+            const card = document.getElementById('mainCard');
+            card.innerHTML = `
+                <h1 style="color: #ff4d6d; font-size: 2.5rem;">СІЗДІ ШЕКСІЗ СҮЙЕМІН!</h1>
+                <p style="font-size: 1.4rem; line-height: 1.8;">
+                    Үйіміздің берекесі, асқар тауымыз!<br>
+                    Бүгінгі кешіңіз жайлы өтсін.<br>
+                    Біз сізбен мақтанамыз ❤️
+                </p>
+                <div style="font-size: 100px; animation: heartbeat 1.5s infinite alternate;">❤️</div>
+            `;
+            
+            for(let i=0; i<15; i++) {
+                setTimeout(() => {
+                    createWord(Math.random() * window.innerWidth, Math.random() * (window.innerHeight - 100));
+                }, i * 1200); // Сөздер тіпті баяу шығады
+            }
+        }
+    </script>
+</body>
+</html>
